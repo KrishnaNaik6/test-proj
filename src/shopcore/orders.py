@@ -103,7 +103,7 @@ class OrderService:
             total_items_count += item.quantity
             reservation_requests.append((item.sku, item.quantity))
 
-        # Atomic reservation
+        # Batch reservation
         self.inventory.batch_reserve(reservation_requests)
 
         # Calculate pricing
@@ -156,15 +156,10 @@ class OrderService:
         if order.status == OrderStatus.CANCELLED:
             raise InvalidOrderStateError("Order is already cancelled")
 
-        if order.status == OrderStatus.PENDING:
-            # Release pending reservations
+        if order.status in (OrderStatus.PENDING, OrderStatus.CONFIRMED):
             for item in order.items:
                 self.inventory.release_stock(item.sku, item.quantity)
-        elif order.status == OrderStatus.CONFIRMED:
-            # Restock deducted inventory
-            for item in order.items:
-                self.inventory.restock(item.sku, item.quantity)
-            if order.points_awarded > 0:
+            if order.status == OrderStatus.CONFIRMED and order.points_awarded > 0:
                 self.users.deduct_loyalty_points(order.user_id, order.points_awarded)
 
         order.status = OrderStatus.CANCELLED

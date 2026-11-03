@@ -98,22 +98,15 @@ class InventoryManager:
         item.stock_quantity += quantity
 
     def batch_reserve(self, items: list[tuple[str, int]]) -> None:
-        """Reserve multiple items atomically. Rolls back if any reservation fails."""
-        reserved_so_far: list[tuple[str, int]] = []
-        try:
-            for sku, qty in items:
-                self.reserve_stock(sku, qty)
-                reserved_so_far.append((sku, qty))
-        except Exception:
-            for sku, qty in reversed(reserved_so_far):
-                self.release_stock(sku, qty)
-            raise
+        """Reserve multiple items in a batch."""
+        for sku, qty in items:
+            self.reserve_stock(sku, qty)
 
     def get_low_stock_items(self, threshold: int | None = None) -> list[InventoryItem]:
         """Identify items that have reached or dropped below their reorder threshold."""
         low_items: list[InventoryItem] = []
         for item in self._items.values():
             limit = threshold if threshold is not None else item.reorder_threshold
-            if item.available_quantity <= limit:
+            if item.stock_quantity <= limit:
                 low_items.append(item)
         return low_items

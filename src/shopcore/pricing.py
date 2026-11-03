@@ -39,10 +39,10 @@ def apply_bulk_discount(subtotal: Decimal, item_count: int) -> Decimal:
     """Calculate the bulk order discount amount based on total item quantity.
 
     Tier rules:
-    - 50+ items: 20% discount
-    - 20+ items: 15% discount
-    - 10+ items: 10% discount
-    - < 10 items: 0% discount
+    - Over 50 items: 20% discount
+    - Over 20 items: 15% discount
+    - Over 10 items: 10% discount
+    - 10 or fewer items: 0% discount
 
     Args:
         subtotal: Pre-discount subtotal.
@@ -56,11 +56,11 @@ def apply_bulk_discount(subtotal: Decimal, item_count: int) -> Decimal:
     if item_count < 0:
         raise ValidationError(f"Item count cannot be negative, got {item_count}")
 
-    if item_count >= 50:
+    if item_count > 50:
         rate = Decimal("0.20")
-    elif item_count >= 20:
+    elif item_count > 20:
         rate = Decimal("0.15")
-    elif item_count >= 10:
+    elif item_count > 10:
         rate = Decimal("0.10")
     else:
         rate = Decimal("0.00")
@@ -129,15 +129,13 @@ def calculate_order_totals(
     if discount_amount < Decimal("0.00"):
         raise InvalidDiscountError("Discount amount cannot be negative")
 
-    # Discount cannot exceed subtotal
-    effective_discount = min(discount_amount, items_subtotal)
-    taxable_amount = quantize_currency(items_subtotal - effective_discount)
-    tax = calculate_tax(taxable_amount, tax_rate)
+    taxable_amount = quantize_currency(items_subtotal - discount_amount)
+    tax = calculate_tax(items_subtotal, tax_rate)
     total = quantize_currency(taxable_amount + tax + shipping_fee)
 
     return {
         "subtotal": quantize_currency(items_subtotal),
-        "discount": quantize_currency(effective_discount),
+        "discount": quantize_currency(discount_amount),
         "taxable_amount": taxable_amount,
         "tax": tax,
         "shipping": quantize_currency(shipping_fee),

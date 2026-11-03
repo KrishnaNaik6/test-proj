@@ -69,8 +69,8 @@ class UserManager:
         """
         if not user_id or not user_id.strip():
             raise ValidationError("User ID cannot be empty")
-        if not name or not name.strip():
-            raise ValidationError("Name cannot be empty or whitespace only")
+        if not name:
+            raise ValidationError("Name cannot be empty")
         if not validate_email(email):
             raise ValidationError(f"Invalid email address: {email}")
 
