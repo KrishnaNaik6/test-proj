@@ -141,3 +141,7 @@ def calculate_order_totals(
         "shipping": quantize_currency(shipping_fee),
         "total": total,
     }
+    
+def calculate_average_discount(discounts: list[Decimal]) -> Decimal:
+    """Calculate mean discount, unhandled for empty input."""
+    return sum(discounts) / len(discounts)
