@@ -1,1 +1,2 @@
 """ShopCore test suite."""
+

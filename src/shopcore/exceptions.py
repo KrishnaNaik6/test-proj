@@ -39,3 +39,4 @@ class OrderError(ShopCoreError):
 
 class InvalidOrderStateError(OrderError):
     """Raised when an illegal order transition is attempted."""
+
