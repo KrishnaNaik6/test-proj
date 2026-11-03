@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write  # Needed to post comments on the PR
+  pull-requests: write
 
 jobs:
   adversary-review:
@@ -24,12 +24,7 @@ jobs:
       - name: Install Adversary
         run: |
           python -m pip install --upgrade pip
-          # If pyproject.toml has name = "adversary", install locally; otherwise install from GitHub:
-          if [ -f "pyproject.toml" ] && grep -q 'name = "adversary"' pyproject.toml; then
-            python -m pip install -e .
-          else
-            python -m pip install git+https://github.com/KrishnaNaik6/adversarial-multiagent-code-reviewer.git
-          fi
+          python -m pip install .
 
       - name: Run Evidence-Gated Review
         run: |
