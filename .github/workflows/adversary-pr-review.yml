@@ -16,22 +16,33 @@ jobs:
     steps:
       - name: Checkout PR Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install Adversary
+      - name: Checkout Adversary Reviewer Engine
+        uses: actions/checkout@v4
+        with:
+          repository: KrishnaNaik6/adversarial-multiagent-code-reviewer
+          ref: main
+          path: adversary-engine
+          persist-credentials: false
+
+      - name: Install Dependencies and Adversary Engine
         run: |
           python -m pip install --upgrade pip
-          python -m pip install git+https://github.com/KrishnaNaik6/adversarial-multiagent-code-reviewer.git
+          python -m pip install ./adversary-engine
 
       - name: Run Evidence-Gated Review
         run: |
           python -m adversary review .
 
       - name: Generate PR Markdown Report
+        if: always()
         run: |
           python -m adversary report --format markdown --output pr_report.md
 
