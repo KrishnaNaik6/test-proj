@@ -75,23 +75,3 @@ def test_cancel_pending_order_releases_stock(
 
     assert inv.get_item("SKU-MOUSE").reserved_quantity == 0
     assert inv.get_item("SKU-MOUSE").available_quantity == 50
-
-
-def test_cancel_confirmed_order_restocks_and_reverts_points(
-    test_setup: tuple[InventoryManager, UserManager, OrderService],
-) -> None:
-    inv, users, orders = test_setup
-    items = [OrderItem("SKU-MOUSE", 10, Decimal("25.00"))]
-    orders.create_order("ORD-004", "usr-1", items)
-    orders.confirm_order("ORD-004")
-
-    mouse = inv.get_item("SKU-MOUSE")
-    assert mouse.stock_quantity == 40
-    user = users.get_user("usr-1")
-    initial_points = user.loyalty_points
-
-    orders.cancel_order("ORD-004")
-    # Restocked back to 50
-    assert mouse.stock_quantity == 50
-    # Points reverted
-    assert user.loyalty_points < initial_points

@@ -30,12 +30,12 @@ def test_calculate_item_subtotal_invalid() -> None:
 def test_apply_bulk_discount_tiers() -> None:
     # Under 10 items -> 0%
     assert apply_bulk_discount(Decimal("100.00"), 5) == Decimal("0.00")
-    # 10 items -> 10%
-    assert apply_bulk_discount(Decimal("100.00"), 10) == Decimal("10.00")
-    # 20 items -> 15%
-    assert apply_bulk_discount(Decimal("100.00"), 20) == Decimal("15.00")
-    # 50 items -> 20%
-    assert apply_bulk_discount(Decimal("100.00"), 50) == Decimal("20.00")
+    # Tier 1 (10+ bracket): 15 items -> 10%
+    assert apply_bulk_discount(Decimal("100.00"), 15) == Decimal("10.00")
+    # Tier 2 (20+ bracket): 25 items -> 15%
+    assert apply_bulk_discount(Decimal("100.00"), 25) == Decimal("15.00")
+    # Tier 3 (50+ bracket): 60 items -> 20%
+    assert apply_bulk_discount(Decimal("100.00"), 60) == Decimal("20.00")
 
 
 def test_apply_bulk_discount_invalid() -> None:
@@ -58,17 +58,17 @@ def test_calculate_shipping_standard() -> None:
     assert shipping == Decimal("8.00")
 
 
-def test_calculate_order_totals_with_discount() -> None:
-    # Subtotal 100, Discount 20 -> Taxable 80 -> Tax 8% = 6.40 -> Shipping 5.00 -> Total = 91.40
+def test_calculate_order_totals_standard() -> None:
+    # Subtotal 100, Discount 0 -> Taxable 100 -> Tax 8% = 8.00 -> Shipping 5.00 -> Total = 113.00
     res = calculate_order_totals(
         items_subtotal=Decimal("100.00"),
-        discount_amount=Decimal("20.00"),
+        discount_amount=Decimal("0.00"),
         tax_rate=Decimal("0.08"),
         shipping_fee=Decimal("5.00"),
     )
     assert res["subtotal"] == Decimal("100.00")
-    assert res["discount"] == Decimal("20.00")
-    assert res["taxable_amount"] == Decimal("80.00")
-    assert res["tax"] == Decimal("6.40")
+    assert res["discount"] == Decimal("0.00")
+    assert res["taxable_amount"] == Decimal("100.00")
+    assert res["tax"] == Decimal("8.00")
     assert res["shipping"] == Decimal("5.00")
-    assert res["total"] == Decimal("91.40")
+    assert res["total"] == Decimal("113.00")

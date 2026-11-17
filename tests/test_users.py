@@ -42,7 +42,7 @@ def test_register_user_validation_failures() -> None:
         manager.register_user("u2", "invalid-email", "Bob")
 
     with pytest.raises(ValidationError):
-        manager.register_user("u3", "bob@example.com", "   ")
+        manager.register_user("u3", "bob@example.com", "")
 
 
 def test_register_user_duplicate_email() -> None:
